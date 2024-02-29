@@ -1,0 +1,38 @@
+data "google_project" "host_project" {}
+
+resource "google_project_service" "apphub" {
+  project = data.google_project.host_project.project_id
+  service = "apphub.googleapis.com"
+  disable_on_destroy = false
+}
+
+resource "google_apphub_application" "application" {
+  location = "us-east1"
+  application_id = "<%= ctx[:vars]['application_id'] %>"
+  scope {
+    type = "REGIONAL"
+  }
+  depends_on = [google_project_service.apphub]
+}
+
+# resource "google_project" "service_project" {
+#   project_id ="<%= ctx[:vars]['service_project_attachment_id'] %>"
+#   name = "Service Project"
+#   org_id = "<%= ctx[:test_env_vars]['org_id'] %>"
+# }
+
+# resource "google_apphub_service_project_attachment" "service_project_attachment" {
+#   service_project_attachment_id = "serviceproject-demo-2"
+#   depends_on = [google_project_service.apphub]
+# }
+
+# create service
+
+# discovered service block
+
+resource "google_apphub_service" "<%= ctx[:primary_resource_id] %>" {
+  location = "us-east1"
+  applications_id = google_apphub_application.application.application_id
+  service_id = "l7-ilb-backend-subnet"
+  discovered_service = "projects/93778748521/locations/us-east1/discoveredServices/4b7d029e-3ff4-436e-aedc-78cbf256a1a9"
+}
